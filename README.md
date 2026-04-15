@@ -1,12 +1,13 @@
 # M365 XDR Data Ingest
 
-This KQL query shows all M365 XDR tables (Defender XDR + Entra ID) with their size in GB, event count, daily average, and estimated cost if they were billable. Use it to quantify the cost of sending the raw data to Sentinel Analytics or Data Lake tier.
+This KQL query shows all M365 XDR tables (Defender XDR) with their size in GB, event count, daily average, and estimated cost if they were billable. Use it to quantify the cost of sending the raw data to Sentinel Analytics or Data Lake tier.
+
+> **Note:** Entra ID tables (`SigninLogs`, `AuditLogs`, `AAD*`, `ADFSSignInLogs`) are excluded — they are ingested via the Entra ID connector in Sentinel, not the Defender XDR connector.
 
 ## Tables covered
 
 | Product | Tables |
 |---------|--------|
-| Microsoft Entra ID | `SigninLogs`, `AuditLogs`, `AADNonInteractiveUserSignInLogs`, `AADServicePrincipalSignInLogs`, `AADManagedIdentitySignInLogs`, `AADProvisioningLogs`, `ADFSSignInLogs` |
 | Microsoft Defender for Endpoint (MDE) | `DeviceEvents`, `DeviceFileEvents`, `DeviceLogonEvents`, `DeviceNetworkEvents`, `DeviceProcessEvents`, `DeviceRegistryEvents`, `DeviceImageLoadEvents`, `DeviceNetworkInfo`, `DeviceInfo`, `DeviceFileCertificateInfo` |
 | Microsoft Defender for Identity (MDI) | `IdentityLogonEvents`, `IdentityQueryEvents`, `IdentityDirectoryEvents` |
 | Microsoft Defender for Office 365 (MDO) | `EmailEvents`, `EmailUrlInfo`, `EmailAttachmentInfo`, `EmailPostDeliveryEvents` |
@@ -41,7 +42,3 @@ The output includes a summary row (`=== TOTAL ===`) with aggregated totals acros
 | `TotalEvents` | Total event count |
 | `IfBillableCostUSD` | Estimated cost if data were billed at the configured price per GB |
 | `FirstEvent` / `LastEvent` | Time range of events in the lookback window |
-
-## License
-
-MIT

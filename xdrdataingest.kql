@@ -1,18 +1,16 @@
 // M365 XDR Data Ingest - Table Sizes by Product
-// Shows all M365 XDR tables (Defender XDR + Entra ID) with their size in GB,
+// Shows all M365 XDR tables (Defender XDR) with their size in GB,
 // event count, daily average, and estimated cost if they were billable.
 // Use it to quantify the cost of sending the raw data to Sentinel Analytics
 // or Data Lake tier. Includes a TOTAL row summarising all columns.
+// Note: Entra ID tables (SigninLogs, AuditLogs, AAD*) are excluded as they
+// are ingested via the Entra ID connector, not the Defender XDR connector.
 // =====================================================================
 
 let Price = 3.0;
 let LookbackDays = 30;
 let TableData = 
     union withsource=TableName
-        // Entra ID (formerly Azure AD)
-        SigninLogs, AuditLogs, AADNonInteractiveUserSignInLogs,
-        AADServicePrincipalSignInLogs, AADManagedIdentitySignInLogs,
-        AADProvisioningLogs, ADFSSignInLogs,
         // Defender for Endpoint (MDE)
         DeviceEvents, DeviceFileEvents, DeviceLogonEvents, DeviceNetworkEvents,
         DeviceProcessEvents, DeviceRegistryEvents, DeviceImageLoadEvents,
@@ -37,13 +35,12 @@ let TableData =
         DailyAvgMB = round(SizeInMB / todecimal(LookbackDays), 2),
         IfBillableCostUSD = round(SizeInGB * Price, 2),
         DefenderProduct = case(
-            TableName has "Signin" or TableName has "Audit" or TableName startswith "AAD" or TableName == "ADFSSignInLogs", "Microsoft Entra ID",
             TableName startswith "Device", "Microsoft Defender for Endpoint (MDE)",
             TableName startswith "Identity", "Microsoft Defender for Identity (MDI)",
             TableName startswith "Email", "Microsoft Defender for Office 365 (MDO)",
             TableName startswith "CloudApp", "Microsoft Defender for Cloud Apps (MCA)",
             TableName startswith "Alert", "Microsoft 365 Defender (Alerts)",
-            "Other M365 E5 Benefit"
+            "Other XDR"
         )
     | project 
         DefenderProduct, TableName, SizeInGB, SizeInMB, DailyAvgMB,
