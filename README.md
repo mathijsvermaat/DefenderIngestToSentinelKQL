@@ -23,7 +23,7 @@ This KQL query shows all M365 XDR tables (Defender XDR) with their size in GB, e
 
 ## How to use
 
-1. Open **Microsoft Sentinel** > **Logs** (or **Advanced Hunting** in the Defender portal)
+1. Open **Defender portal** > **Advanced Hunting** (under Investigation & Response > Hunting in old portal layout)
 2. Paste the contents of [`xdrdataingest.kql`](xdrdataingest.kql)
 3. Adjust `Price` and `LookbackDays` if needed
 4. Run the query
