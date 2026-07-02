@@ -1,0 +1,54 @@
+// Defender for Cloud Data Ingest - Table Sizes
+// Shows selected Defender for Cloud related tables with their size in GB,
+// event count, daily average, and estimated cost if they were billable.
+// Use it to quantify the cost of sending the raw data to Sentinel Analytics
+// or Data Lake tier. Includes a TOTAL row summarising all columns.
+// =====================================================================
+
+let Price = 3.0;
+let LookbackDays = 30;
+let TableData =
+    union isfuzzy=true hint.concurrency=8 withsource=TableName
+        SecurityAlert,
+        SecurityBaseline,
+        SecurityBaselineSummary,
+        SecurityDetection,
+        SecurityEvent,
+        WindowsFirewall,
+        ProtectionStatus,
+        Update,
+        UpdateSummary,
+        MDCFileIntegrityMonitoringEvents,
+        WindowsEvent
+    | where TimeGenerated > ago(totimespan(1d) * LookbackDays)
+    | summarize
+        TotalEvents = count(),
+        SizeInGB = round(sum(estimate_data_size(*)) / 1000.0 / 1000.0 / 1000.0, 2),
+        SizeInMB = round(sum(estimate_data_size(*)) / 1000.0 / 1000.0, 2),
+        FirstEvent = min(TimeGenerated),
+        LastEvent = max(TimeGenerated)
+        by TableName
+    | extend
+        DailyAvgMB = round(SizeInMB / todecimal(LookbackDays), 2),
+        IfBillableCostUSD = round(SizeInGB * Price, 2),
+        DefenderProduct = "Microsoft Defender for Cloud (MDC)"
+    | project
+        DefenderProduct, TableName, SizeInGB, SizeInMB, DailyAvgMB,
+        TotalEvents, IfBillableCostUSD,
+        FirstEvent, LastEvent;
+TableData
+| union (
+    TableData
+    | summarize
+        SizeInGB = round(sum(SizeInGB), 2),
+        SizeInMB = round(sum(SizeInMB), 2),
+        DailyAvgMB = round(sum(DailyAvgMB), 2),
+        TotalEvents = sum(TotalEvents),
+        IfBillableCostUSD = round(sum(IfBillableCostUSD), 2)
+    | extend
+        DefenderProduct = "=== TOTAL ===",
+        TableName = "All Tables",
+        FirstEvent = datetime(null),
+        LastEvent = datetime(null)
+)
+| order by DefenderProduct asc, SizeInGB desc
