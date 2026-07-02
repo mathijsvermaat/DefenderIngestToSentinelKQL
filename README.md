@@ -2,7 +2,7 @@
 
 This KQL query shows all M365 XDR tables (Defender XDR) with their size in GB, event count, daily average, and estimated cost if they were billable. Use it to quantify the cost of sending the raw data to Sentinel Analytics or Data Lake tier.
 
-> **Note:** Entra ID tables (`SigninLogs`, `AuditLogs`, `AAD*`, `ADFSSignInLogs`) are excluded — they are ingested via the Entra ID connector in Sentinel, not the Defender XDR connector.
+The main query in [xdrdataingest.kql](xdrdataingest.kql) includes both Defender XDR and Entra ID tables.
 
 ## Tables covered
 
@@ -13,6 +13,7 @@ This KQL query shows all M365 XDR tables (Defender XDR) with their size in GB, e
 | Microsoft Defender for Office 365 (MDO) | `EmailEvents`, `EmailUrlInfo`, `EmailAttachmentInfo`, `EmailPostDeliveryEvents` |
 | Microsoft Defender for Cloud Apps (MCA) | `CloudAppEvents` |
 | Microsoft 365 Defender (Alerts) | `AlertEvidence` |
+| Microsoft Entra ID (Entra) | `AuditLogs`, `AADNonInteractiveUserSignInLogs`, `AADServicePrincipalSignInLogs`, `AADManagedIdentitySignInLogs`, `AADProvisioningLogs` |
 
 ## Parameters
 
@@ -26,7 +27,7 @@ This KQL query shows all M365 XDR tables (Defender XDR) with their size in GB, e
 1. Open **Defender portal** > **Advanced Hunting** (under Investigation & Response > Hunting in old portal layout)
 2. Paste the contents of [`xdrdataingest.kql`](xdrdataingest.kql)
 3. Adjust `Price` and `LookbackDays` if needed
-4. Run the query
+4. Run the query with the desired time range set in the query editor time picker or API `timespan`
 
 The output includes a summary row (`=== TOTAL ===`) with aggregated totals across all tables.
 
