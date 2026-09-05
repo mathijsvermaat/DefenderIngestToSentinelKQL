@@ -10,7 +10,7 @@
 let Price = 3.0;
 let LookbackDays = 30;
 let TableData = 
-    union withsource=TableName
+    union hint.concurrency=8 withsource=TableName
         // Defender for Endpoint (MDE)
         DeviceEvents, DeviceFileEvents, DeviceLogonEvents, DeviceNetworkEvents,
         DeviceProcessEvents, DeviceRegistryEvents, DeviceImageLoadEvents,
@@ -22,7 +22,11 @@ let TableData =
         // Defender for Office 365 (MDO)
         EmailEvents, EmailUrlInfo, EmailAttachmentInfo, EmailPostDeliveryEvents,
         // Defender for Cloud Apps (MCA)
-        CloudAppEvents
+        CloudAppEvents,
+        // Entra ID
+        AuditLogs, AADNonInteractiveUserSignInLogs,
+        AADServicePrincipalSignInLogs, AADManagedIdentitySignInLogs,
+        AADProvisioningLogs
     | where TimeGenerated > ago(totimespan(1d) * LookbackDays)
     | summarize 
         TotalEvents = count(),
@@ -40,6 +44,11 @@ let TableData =
             TableName startswith "Email", "Microsoft Defender for Office 365 (MDO)",
             TableName startswith "CloudApp", "Microsoft Defender for Cloud Apps (MCA)",
             TableName startswith "Alert", "Microsoft 365 Defender (Alerts)",
+            TableName in (
+                "AuditLogs", "AADNonInteractiveUserSignInLogs",
+                "AADServicePrincipalSignInLogs", "AADManagedIdentitySignInLogs",
+                "AADProvisioningLogs"
+            ), "Microsoft Entra ID (Entra)",
             "Other XDR"
         )
     | project 
